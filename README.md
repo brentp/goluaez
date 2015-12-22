@@ -3,7 +3,7 @@ luaez
 
 [![GoDoc](https://godoc.org/github.com/brentp/goluaez?status.svg)](https://godoc.org/github.com/brentp/goluaez)
 [![Build Status](https://travis-ci.org/brentp/goluaez.svg)](https://travis-ci.org/brentp/goluaez)
-[![Coverage Status](https://coveralls.io/repos/brentp/goluaez/badge.svg)](https://coveralls.io/r/brentp/goluaez)
+[![Coverage Status](https://coveralls.io/repos/brentp/goluaez/badge.svg?branch=master&service=github)](https://coveralls.io/github/brentp/goluaez?branch=master)
 
 
 Easy embedding of lua in go.
