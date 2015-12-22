@@ -8,7 +8,7 @@ luaez
 
 Easy embedding of lua in go.
 
-`goluaez` wraps [gopher-lua](https://github.com/yuin/gopher-lua) and [gopher-luar](https://github.com/layeh/gopher-luar). `gopher-luar` does a nice job of converting go values to lua. This package uses that can also converts lua values to go.
+`goluaez` wraps [gopher-lua](https://github.com/yuin/gopher-lua) and [gopher-luar](https://github.com/layeh/gopher-luar). `gopher-luar` does a nice job of converting go values to lua. This package uses that and also converts lua values to go.
 
 This makes it easy to have small 1 or 2 line user-defined functions in a go application that embeds lua.
 
