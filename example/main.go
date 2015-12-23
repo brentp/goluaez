@@ -14,7 +14,10 @@ func check(e error) {
 }
 
 func main() {
-	L, err := goluaez.NewState("adder = function(a, b) return a + b end")
+	L, err := goluaez.NewState(`
+adder = function(a, b)
+    return a + b
+end`)
 	check(err)
 	defer L.Close()
 

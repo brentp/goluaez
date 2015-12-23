@@ -33,7 +33,7 @@ func NewState(code ...string) (*State, error) {
 	s.LState = lua.NewState()
 	s.PreloadModule("re", gluare.Loader)
 	var err error
-	if len(code) != 0 {
+	if len(code) != 0 && len(code[0]) != 0 {
 		err = s.LState.DoString(code[0])
 		if err != nil {
 			return s, err
