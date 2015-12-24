@@ -8,7 +8,7 @@ luaez
 
 Easy embedding of lua in go.
 
-`goluaez` wraps [gopher-lua](https://github.com/yuin/gopher-lua) and [gopher-luar](https://github.com/layeh/gopher-luar). `gopher-luar` does a nice job of converting go values to lua. This package uses that and also converts lua values to go.
+`goluaez` wraps [gopher-lua](https://github.com/yuin/gopher-lua) and [gopher-luar](https://github.com/layeh/gopher-luar). `gopher-luar` does a nice job of converting go values to lua. This package uses that and also converts lua values to go and converts go slices to lua tables.
 
 This makes it easy to have small 1 or 2 line user-defined functions in a go application that embeds lua.
 
@@ -31,7 +31,10 @@ func check(e error) {
 }
 
 func main() {
-	L, err := goluaez.NewState("adder = function(a, b) return a + b end")
+	L, err := goluaez.NewState(`
+adder = function(a, b)
+    return a + b
+end`)
 	check(err)
 	defer L.Close()
 
@@ -45,13 +48,6 @@ func main() {
 	check(err)
 	fmt.Println(result.(string))
 	// hello world
-
-	result, err = L.Run("split(word, sep)", map[string]interface{}{"word": "a b c   d", "sep": "\\s+"})
-	check(err)
-	fmt.Println(result.([]string))
-	fmt.Println(len(result.([]string)))
-	// [a b c d]
-	// 4
 
 	L.DoString("a = {}; a['a'] = 22; a['b'] = 33;")
 	result, err = L.Run("a")

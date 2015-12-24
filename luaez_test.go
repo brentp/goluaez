@@ -112,3 +112,20 @@ func (t *Tester) TestRun(c *C) {
 	c.Assert(v, Equals, float64(66))
 
 }
+
+func (t *Tester) TestSliceToTable(c *C) {
+	s, _ := goluaez.NewState()
+
+	v, err := s.Run("#tbl", map[string]interface{}{"tbl": []string{"aaa", "bbb", "cccc"}})
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, float64(3))
+
+	v, err = s.Run("table.concat(tbl, ',')", map[string]interface{}{"tbl": []string{"aaa", "bbb", "cccc"}})
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, "aaa,bbb,cccc")
+
+	v, err = s.Run("table.concat(tbl, ',')", map[string]interface{}{"tbl": [3]string{"aaa", "bbb", "cccc"}})
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, "aaa,bbb,cccc")
+
+}

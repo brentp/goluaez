@@ -17,6 +17,28 @@ type State struct {
 
 // TODO: see https://github.com/yuin/gluamapper
 
+// New returns a lua.LValue from a golang object. It is the same as luar.go except it converts
+// a go slice into a lua.LTable
+func New(L *lua.LState, value interface{}) lua.LValue {
+	if value == nil {
+		return lua.LNil
+	}
+	if lval, ok := value.(lua.LValue); ok {
+		return lval
+	}
+	val := reflect.ValueOf(value)
+	switch val.Kind() {
+	case reflect.Slice, reflect.Array:
+		lt := L.CreateTable(val.Len(), 0)
+		for i := 0; i < val.Len(); i++ {
+			ival := val.Index(i)
+			lt.RawSetInt(i+1, luar.New(L, ival.Interface()))
+		}
+		return lt
+	}
+	return luar.New(L, value)
+}
+
 // NewState creates a new State object optionally initialized with some code.
 func NewState(code ...string) (*State, error) {
 	s := &State{}
@@ -33,7 +55,7 @@ func NewState(code ...string) (*State, error) {
 }
 
 func (s *State) SetGlobal(name string, val interface{}) {
-	s.LState.SetGlobal(name, luar.New(s.LState, val))
+	s.LState.SetGlobal(name, New(s.LState, val))
 }
 
 func LValue2Go(v lua.LValue) (interface{}, error) {
@@ -102,12 +124,13 @@ func LValue2Go(v lua.LValue) (interface{}, error) {
 
 }
 
+// Run code given some values. This is thread-safe.
 func (s *State) Run(code string, values ...map[string]interface{}) (interface{}, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if len(values) != 0 {
 		for k, v := range values[0] {
-			s.SetGlobal(k, luar.New(s.LState, v))
+			s.SetGlobal(k, New(s.LState, v))
 		}
 	}
 	if err := s.DoString("return " + code); err != nil {

@@ -32,13 +32,6 @@ end`)
 	fmt.Println(result.(string))
 	// hello world
 
-	result, err = L.Run("split(word, sep)", map[string]interface{}{"word": "a b c   d", "sep": "\\s+"})
-	check(err)
-	fmt.Println(result.([]string))
-	fmt.Println(len(result.([]string)))
-	// [a b c d]
-	// 4
-
 	L.DoString("a = {}; a['a'] = 22; a['b'] = 33;")
 	result, err = L.Run("a")
 	check(err)
