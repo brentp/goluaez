@@ -3,6 +3,7 @@ package goluaez
 import (
 	"log"
 	"reflect"
+	"strings"
 	"sync"
 
 	"github.com/layeh/gopher-luar"
@@ -43,6 +44,7 @@ func New(L *lua.LState, value interface{}) lua.LValue {
 func NewState(code ...string) (*State, error) {
 	s := &State{}
 	s.LState = lua.NewState()
+	s.SetGlobal("gosplit", luar.New(s.LState, split))
 	s.PreloadModule("re", gluare.Loader)
 	var err error
 	if len(code) != 0 && len(code[0]) != 0 {
@@ -122,6 +124,10 @@ func LValue2Go(v lua.LValue) (interface{}, error) {
 	}
 	return v, nil
 
+}
+
+func split(str, sep string) []string {
+	return strings.Split(str, sep)
 }
 
 // Run code given some values. This is thread-safe.
