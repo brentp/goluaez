@@ -3,8 +3,6 @@ package goluaez
 import (
 	"log"
 	"reflect"
-	"regexp"
-	"strings"
 	"sync"
 
 	"github.com/layeh/gopher-luar"
@@ -15,14 +13,6 @@ import (
 type State struct {
 	mu sync.Mutex
 	*lua.LState
-}
-
-func split(str, patt string) []string {
-	return regexp.MustCompile(patt).Split(str, -1)
-}
-
-func index(str, tok string) int {
-	return strings.Index(str, tok)
 }
 
 // TODO: see https://github.com/yuin/gluamapper
@@ -39,8 +29,6 @@ func NewState(code ...string) (*State, error) {
 			return s, err
 		}
 	}
-	s.SetGlobal("split", luar.New(s.LState, split))
-	s.SetGlobal("index", luar.New(s.LState, index))
 	return s, err
 }
 
@@ -56,6 +44,8 @@ func LValue2Go(v lua.LValue) (interface{}, error) {
 		return float64(v.(lua.LNumber)), nil
 	case lua.LTBool:
 		return bool(v.(lua.LBool)), nil
+	case lua.LTNil:
+		return nil, nil
 	case lua.LTTable:
 		tbl := v.(*lua.LTable)
 		varr := make([]interface{}, 0)
@@ -101,7 +91,7 @@ func LValue2Go(v lua.LValue) (interface{}, error) {
 	default:
 		switch t := v.(type) {
 		default:
-			log.Println(t)
+			log.Println("IN luaez ...", t)
 			log.Printf("type:%+v\n", v)
 			log.Println(v.(*lua.LUserData).Value)
 			return reflect.ValueOf(t), nil

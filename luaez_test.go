@@ -112,29 +112,3 @@ func (t *Tester) TestRun(c *C) {
 	c.Assert(v, Equals, float64(66))
 
 }
-
-func (t *Tester) TestSplit(c *C) {
-	s, err := goluaez.NewState()
-	c.Assert(err, IsNil)
-	res, err := s.Run("split('xexexex', 'e')")
-	c.Assert(err, IsNil)
-	c.Assert(len(res.([]string)), Equals, 4)
-
-	res, err = s.Run("split('xe22efg22ex', '\\\\d+')")
-	c.Assert(err, IsNil)
-	c.Assert(len(res.([]string)), Equals, 3)
-	c.Assert(res.([]string)[1], Equals, "efg")
-
-}
-
-func (t *Tester) TestIndex(c *C) {
-	s, err := goluaez.NewState()
-	c.Assert(err, IsNil)
-	res, err := s.Run("index('abcdefg', 'c')")
-	c.Assert(err, IsNil)
-	c.Assert(int(res.(float64)), Equals, 2)
-
-	res, err = s.Run("index('abcdefg', 'h')")
-	c.Assert(err, IsNil)
-	c.Assert(int(res.(float64)), Equals, -1)
-}
