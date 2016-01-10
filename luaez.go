@@ -132,20 +132,34 @@ func split(str, sep string) []string {
 
 // Run code given some values. This is thread-safe.
 func (s *State) Run(code string, values ...map[string]interface{}) (interface{}, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+
 	if len(values) != 0 {
+		lvals := make([]lua.LValue, len(values[0]))
+		keys := make([]string, len(values[0]))
+		j := 0
 		for k, v := range values[0] {
-			s.SetGlobal(k, New(s.LState, v))
+			lvals[j] = New(s.LState, v)
+			keys[j] = k
+			j++
 		}
+		s.mu.Lock()
+
+		for i, lv := range lvals {
+			s.SetGlobal(keys[i], lv)
+		}
+	} else {
+		s.mu.Lock()
 	}
 	if err := s.DoString("return " + code); err != nil {
+		s.mu.Unlock()
 		return nil, err
 	}
 	if s.GetTop() == 0 {
+		s.mu.Unlock()
 		return nil, nil
 	}
 	v := s.Get(-1)
 	s.Pop(1)
+	s.mu.Unlock()
 	return LValue2Go(v)
 }
