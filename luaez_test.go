@@ -129,3 +129,19 @@ func (t *Tester) TestSliceToTable(c *C) {
 	c.Assert(v, Equals, "aaa,bbb,cccc")
 
 }
+
+func (t *Tester) TestSplit(c *C) {
+	s, _ := goluaez.NewState()
+
+	v, err := s.Run("x:split('%s')", map[string]interface{}{"x": "a b c"})
+	c.Assert(err, IsNil)
+	c.Assert(len(v.([]interface{})), Equals, 3)
+}
+
+func (t *Tester) TestStrip(c *C) {
+	s, _ := goluaez.NewState()
+
+	v, err := s.Run("x:strip()", map[string]interface{}{"x": " a b c "})
+	c.Assert(err, IsNil)
+	c.Assert(v.(string), Equals, "a b c")
+}

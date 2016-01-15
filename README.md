@@ -57,3 +57,12 @@ end`)
 
 }
 ```
+
+Prelude
+-------
+
+The embedded lua engine is populated with the lua functions in data/prelude.lua
+So far, this consists of:
+
++ string:split(sep) (split a string by a delim)
++ string:strip() (remove whitespace from a string)

@@ -16,6 +16,23 @@ type State struct {
 	*lua.LState
 }
 
+// dont modify this directly
+// modify code in data/prelude.lua and then put it here.
+const prelude = `
+-- remove whitespace at the ends of a string.
+function string:strip()
+    return self:match'^%s*(.*%S)' or ''
+end
+
+-- split a string by a separator
+function string:split(sep)
+    local sep, fields = sep or "\t", {}
+    local pattern = string.format("[^%s]+", sep)
+    for tok in self:gmatch(pattern) do fields[#fields+1] = tok end
+    return fields
+end
+`
+
 // TODO: see https://github.com/yuin/gluamapper
 
 // New returns a lua.LValue from a golang object. It is the same as luar.go except it converts
@@ -43,10 +60,14 @@ func New(L *lua.LState, value interface{}) lua.LValue {
 // NewState creates a new State object optionally initialized with some code.
 func NewState(code ...string) (*State, error) {
 	s := &State{}
-	s.LState = lua.NewState()
-	s.SetGlobal("gosplit", luar.New(s.LState, split))
+	options := lua.Options{IncludeGoStackTrace: true}
+	s.LState = lua.NewState(options)
 	s.PreloadModule("re", gluare.Loader)
 	var err error
+	err = s.LState.DoString(prelude)
+	if err != nil {
+		return nil, err
+	}
 	if len(code) != 0 && len(code[0]) != 0 {
 		err = s.LState.DoString(code[0])
 		if err != nil {
