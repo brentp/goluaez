@@ -143,8 +143,6 @@ func LValue2Go(v lua.LValue) (interface{}, error) {
 		}
 
 	}
-	return v, nil
-
 }
 
 func split(str, sep string) []string {
