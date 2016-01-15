@@ -3,7 +3,6 @@ package goluaez
 import (
 	"log"
 	"reflect"
-	"strings"
 	"sync"
 
 	"github.com/layeh/gopher-luar"
@@ -145,10 +144,6 @@ func LValue2Go(v lua.LValue) (interface{}, error) {
 	}
 }
 
-func split(str, sep string) []string {
-	return strings.Split(str, sep)
-}
-
 // Run code given some values. This is thread-safe.
 func (s *State) Run(code string, values ...map[string]interface{}) (interface{}, error) {
 
@@ -157,12 +152,14 @@ func (s *State) Run(code string, values ...map[string]interface{}) (interface{},
 		keys := make([]string, len(values[0]))
 		j := 0
 		for k, v := range values[0] {
+			s.mu.Lock()
 			lvals[j] = New(s.LState, v)
+			s.mu.Unlock()
 			keys[j] = k
 			j++
 		}
-		s.mu.Lock()
 
+		s.mu.Lock()
 		for i, lv := range lvals {
 			s.SetGlobal(keys[i], lv)
 		}
