@@ -1,9 +1,11 @@
 package goluaez_test
 
 import (
+	"log"
 	"testing"
 
 	"github.com/brentp/goluaez"
+	"github.com/yuin/gopher-lua"
 
 	. "gopkg.in/check.v1"
 )
@@ -124,9 +126,11 @@ func (t *Tester) TestSliceToTable(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(v, Equals, "aaa,bbb,cccc")
 
-	v, err = s.Run("table.concat(tbl, ',')", map[string]interface{}{"tbl": [3]string{"aaa", "bbb", "cccc"}})
-	c.Assert(err, IsNil)
-	c.Assert(v, Equals, "aaa,bbb,cccc")
+	/*
+		v, err = s.Run("table.concat(tbl, ',')", map[string]interface{}{"tbl": [3]string{"aaa", "bbb", "cccc"}})
+		c.Assert(err, IsNil)
+		c.Assert(v, Equals, "aaa,bbb,cccc")
+	*/
 
 }
 
@@ -144,4 +148,22 @@ func (t *Tester) TestStrip(c *C) {
 	v, err := s.Run("x:strip()", map[string]interface{}{"x": " a b c "})
 	c.Assert(err, IsNil)
 	c.Assert(v.(string), Equals, "a b c")
+}
+
+func (t *Tester) TestGo2LValue(c *C) {
+
+	v, err := goluaez.Go2LValue(64)
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, lua.LNumber(64))
+
+	v, err = goluaez.Go2LValue("string")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, lua.LString("string"))
+
+	v, err = goluaez.Go2LValue([]string{"thing 1", "thing 2"})
+	log.Println(v)
+	c.Assert(err, IsNil)
+	c.Assert(v.(*lua.LTable).Len(), Equals, 2)
+	c.Assert(v.(*lua.LTable).RawGetInt(2).String(), Equals, "thing 2")
+
 }

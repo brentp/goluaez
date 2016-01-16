@@ -1,11 +1,11 @@
 package goluaez
 
 import (
+	"fmt"
 	"log"
 	"reflect"
 	"sync"
 
-	"github.com/layeh/gopher-luar"
 	"github.com/yuin/gluare"
 	"github.com/yuin/gopher-lua"
 )
@@ -34,28 +34,6 @@ end
 
 // TODO: see https://github.com/yuin/gluamapper
 
-// New returns a lua.LValue from a golang object. It is the same as luar.go except it converts
-// a go slice into a lua.LTable
-func New(L *lua.LState, value interface{}) lua.LValue {
-	if value == nil {
-		return lua.LNil
-	}
-	if lval, ok := value.(lua.LValue); ok {
-		return lval
-	}
-	val := reflect.ValueOf(value)
-	switch val.Kind() {
-	case reflect.Slice, reflect.Array:
-		lt := L.CreateTable(val.Len(), 0)
-		for i := 0; i < val.Len(); i++ {
-			ival := val.Index(i)
-			lt.RawSetInt(i+1, luar.New(L, ival.Interface()))
-		}
-		return lt
-	}
-	return luar.New(L, value)
-}
-
 // NewState creates a new State object optionally initialized with some code.
 func NewState(code ...string) (*State, error) {
 	s := &State{}
@@ -76,8 +54,71 @@ func NewState(code ...string) (*State, error) {
 	return s, err
 }
 
-func (s *State) SetGlobal(name string, val interface{}) {
-	s.LState.SetGlobal(name, New(s.LState, val))
+func (s *State) SetGlobal(name string, val interface{}) error {
+	l, err := Go2LValue(val)
+	s.LState.SetGlobal(name, l)
+	return err
+}
+
+func Go2LValue(v interface{}) (lua.LValue, error) {
+	switch v.(type) {
+	case float32:
+		return lua.LNumber(v.(float32)), nil
+	case float64:
+		return lua.LNumber(v.(float64)), nil
+	case int, int32, int64, uint, uint64, uint32:
+		return lua.LNumber(float64(reflect.ValueOf(v).Int())), nil
+	case string:
+		return lua.LString(v.(string)), nil
+	case bool:
+		return lua.LBool(v.(bool)), nil
+	case nil:
+		return lua.LNil, nil
+	case []string:
+		tbl := &lua.LTable{}
+		for _, val := range v.([]string) {
+			tbl.Append(lua.LString(val))
+		}
+		return tbl, nil
+	case []int:
+		tbl := &lua.LTable{}
+		for _, val := range v.([]int) {
+			tbl.Append(lua.LNumber(val))
+		}
+		return tbl, nil
+	case []int64:
+		tbl := &lua.LTable{}
+		for _, val := range v.([]int64) {
+			tbl.Append(lua.LNumber(val))
+		}
+		return tbl, nil
+	case []int32:
+		tbl := &lua.LTable{}
+		for _, val := range v.([]int32) {
+			tbl.Append(lua.LNumber(val))
+		}
+		return tbl, nil
+	case []float32:
+		tbl := &lua.LTable{}
+		for _, val := range v.([]float32) {
+			tbl.Append(lua.LNumber(val))
+		}
+		return tbl, nil
+	case []float64:
+		tbl := &lua.LTable{}
+		for _, val := range v.([]float64) {
+			tbl.Append(lua.LNumber(val))
+		}
+		return tbl, nil
+	case []bool:
+		tbl := &lua.LTable{}
+		for _, val := range v.([]bool) {
+			tbl.Append(lua.LBool(val))
+		}
+		return tbl, nil
+	default:
+		return nil, fmt.Errorf("cant convert %v to LValue", v)
+	}
 }
 
 func LValue2Go(v lua.LValue) (interface{}, error) {
@@ -146,22 +187,25 @@ func LValue2Go(v lua.LValue) (interface{}, error) {
 
 // Run code given some values. This is thread-safe.
 func (s *State) Run(code string, values ...map[string]interface{}) (interface{}, error) {
-
+	var err error
 	if len(values) != 0 {
 		lvals := make([]lua.LValue, len(values[0]))
 		keys := make([]string, len(values[0]))
 		j := 0
 		for k, v := range values[0] {
 			s.mu.Lock()
-			lvals[j] = New(s.LState, v)
+			lvals[j], err = Go2LValue(v)
 			s.mu.Unlock()
+			if err != nil {
+				return nil, err
+			}
 			keys[j] = k
 			j++
 		}
 
 		s.mu.Lock()
 		for i, lv := range lvals {
-			s.SetGlobal(keys[i], lv)
+			s.LState.SetGlobal(keys[i], lv)
 		}
 	} else {
 		s.mu.Lock()
