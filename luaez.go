@@ -118,8 +118,21 @@ func Go2LValue(v interface{}) (lua.LValue, error) {
 			tbl.Append(lua.LBool(val))
 		}
 		return tbl, nil
+	case []interface{}:
+		if len(cast) == 0 {
+			return lua.LNil, nil
+		}
+		tbl := &lua.LTable{}
+		for _, val := range cast {
+			v, err := Go2LValue(val)
+			if err != nil {
+				return nil, err
+			}
+			tbl.Append(v)
+		}
+		return tbl, nil
 	default:
-		return nil, fmt.Errorf("cant convert %v to LValue", v)
+		return nil, fmt.Errorf("cant convert %+v to LValue %+v", v, cast)
 	}
 }
 
