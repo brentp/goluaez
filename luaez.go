@@ -61,58 +61,60 @@ func (s *State) SetGlobal(name string, val interface{}) error {
 }
 
 func Go2LValue(v interface{}) (lua.LValue, error) {
-	switch v.(type) {
+	switch cast := v.(type) {
 	case float32:
-		return lua.LNumber(v.(float32)), nil
+		return lua.LNumber(cast), nil
 	case float64:
-		return lua.LNumber(v.(float64)), nil
-	case int, int32, int64, uint, uint64, uint32:
+		return lua.LNumber(cast), nil
+	case int, int32, int64:
 		return lua.LNumber(float64(reflect.ValueOf(v).Int())), nil
+	case uint, uint32, uint64:
+		return lua.LNumber(float64(reflect.ValueOf(v).Uint())), nil
 	case string:
-		return lua.LString(v.(string)), nil
+		return lua.LString(cast), nil
 	case bool:
-		return lua.LBool(v.(bool)), nil
+		return lua.LBool(cast), nil
 	case nil:
 		return lua.LNil, nil
 	case []string:
 		tbl := &lua.LTable{}
-		for _, val := range v.([]string) {
+		for _, val := range cast {
 			tbl.Append(lua.LString(val))
 		}
 		return tbl, nil
 	case []int:
 		tbl := &lua.LTable{}
-		for _, val := range v.([]int) {
+		for _, val := range cast {
 			tbl.Append(lua.LNumber(val))
 		}
 		return tbl, nil
 	case []int64:
 		tbl := &lua.LTable{}
-		for _, val := range v.([]int64) {
+		for _, val := range cast {
 			tbl.Append(lua.LNumber(val))
 		}
 		return tbl, nil
 	case []int32:
 		tbl := &lua.LTable{}
-		for _, val := range v.([]int32) {
+		for _, val := range cast {
 			tbl.Append(lua.LNumber(val))
 		}
 		return tbl, nil
 	case []float32:
 		tbl := &lua.LTable{}
-		for _, val := range v.([]float32) {
+		for _, val := range cast {
 			tbl.Append(lua.LNumber(val))
 		}
 		return tbl, nil
 	case []float64:
 		tbl := &lua.LTable{}
-		for _, val := range v.([]float64) {
+		for _, val := range cast {
 			tbl.Append(lua.LNumber(val))
 		}
 		return tbl, nil
 	case []bool:
 		tbl := &lua.LTable{}
-		for _, val := range v.([]bool) {
+		for _, val := range cast {
 			tbl.Append(lua.LBool(val))
 		}
 		return tbl, nil

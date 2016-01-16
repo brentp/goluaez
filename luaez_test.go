@@ -1,7 +1,6 @@
 package goluaez_test
 
 import (
-	"log"
 	"testing"
 
 	"github.com/brentp/goluaez"
@@ -156,12 +155,15 @@ func (t *Tester) TestGo2LValue(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(v, Equals, lua.LNumber(64))
 
+	v, err = goluaez.Go2LValue(float32(32))
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, lua.LNumber(32))
+
 	v, err = goluaez.Go2LValue("string")
 	c.Assert(err, IsNil)
 	c.Assert(v, Equals, lua.LString("string"))
 
 	v, err = goluaez.Go2LValue([]string{"thing 1", "thing 2"})
-	log.Println(v)
 	c.Assert(err, IsNil)
 	c.Assert(v.(*lua.LTable).Len(), Equals, 2)
 	c.Assert(v.(*lua.LTable).RawGetInt(2).String(), Equals, "thing 2")
